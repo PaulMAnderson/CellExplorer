@@ -68,12 +68,12 @@ if exist(fullfile(basepath,'info.rhd'),'file')
         end
         if isfield(Intan_rec_info,'amplifier_channels')
             session.timeSeries.dat.fileName  = [session.general.name,'.dat'];
-            session.timeSeries.dat.precision  = 'uint16';
+            session.timeSeries.dat.precision  = 'int16';
             session.timeSeries.dat.nChannels  = size(Intan_rec_info.amplifier_channels,2);
             session.timeSeries.dat.sr = Intan_rec_info.frequency_parameters.amplifier_sample_rate;
             fileinfo = dir(fullfile(session.general.basePath,session.timeSeries.dat.fileName));
             if ~isempty(fileinfo)
-                session.timeSeries.dat.nSamples = fileinfo.bytes/2; % uint16 = 2 bytes
+                session.timeSeries.dat.nSamples = fileinfo.bytes/(session.timeSeries.dat.nChannels * 2); %uint16 = 2 bytes
             else
                 session.timeSeries.dat.nSamples = 0;
             end

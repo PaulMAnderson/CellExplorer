@@ -1745,7 +1745,7 @@ end
             plotAxes.XLabel.String = 'Time (ms)';
             plotAxes.YLabel.String = 'Channels';
             plotAxes.Title.String = customPlotSelection;
-            if isfield(general,'electrodeGroups') && isfield(general,'electrodeGroups') && ~isempty(cell_metrics.waveforms.filt_all{ii}) && ~isempty(cell_metrics.waveforms.time_all{ii})
+            if isfield(general,'electrodeGroups') && ~isempty(cell_metrics.waveforms.filt_all{ii}) && ~isempty(cell_metrics.waveforms.time_all{ii})
                 if UI.preferences.plotChannelMapAllChannels
                     channelOrder = flip([general.electrodeGroups{:}]);
                     horzlines = cumsum(flip(cellfun(@length,general.electrodeGroups)));
@@ -3292,7 +3292,7 @@ end
             if isfield(cell_metrics.waveforms,'peakVoltage_all') && ~isempty(cell_metrics.waveforms.peakVoltage_all{ii})
                 switch UI.preferences.peakVoltage_all_sorting
                     case 'channelOrder'
-                        if isfield(general,'electrodeGroups') && isfield(general,'electrodeGroups') && ~isempty(cell_metrics.waveforms.filt_all{ii}) && ~isempty(cell_metrics.waveforms.time_all{ii})
+                        if isfield(general,'electrodeGroups') && ~isempty(cell_metrics.waveforms.filt_all{ii}) && ~isempty(cell_metrics.waveforms.time_all{ii})
                             channelOrder = [general.electrodeGroups{:}];
                             if numel(channelOrder) > size(cell_metrics.waveforms.filt_all{ii},1)
                                 channelOrder = 1:size(cell_metrics.waveforms.filt_all{ii},1);

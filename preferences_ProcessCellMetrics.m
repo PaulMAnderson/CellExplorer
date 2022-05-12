@@ -11,7 +11,7 @@ preferences.general.probesVerticalSpacing = 10; % 10um spacing between channels
 preferences.general.probesLayout = 'poly2';     % Default probe layout
 
 % Loading spike data
-preferences.loadSpikes.labelsToRead = {'good'};     % allows you to load units with various labels, e.g. MUA or a custom label
+preferences.loadSpikes.labelsToRead = {'good','mua'};     % allows you to load units with various labels, e.g. MUA or a custom label
 
 % Waveform
 preferences.waveform.nPull = 600;               % number of spikes to pull out (default: 600)

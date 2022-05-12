@@ -541,6 +541,10 @@ if any(contains(parameters.metrics,{'waveform_metrics','all'})) && ~any(contains
                 [channel_distance,idx2] = sort(hypot((x1(:)-u),(y1(:)-v)));
                 
                 nChannelFit = min([16,length(session.extracellular.electrodeGroups.channels{spikes{spkExclu}.shankID(j)})]);
+                if nChannelFit < 3; nChannelFit = 3; end
+                %Weird errors, forcing to 16 - error results from the way I
+                %defined electrode groups in the kilosort channel map -
+                %have regerence channels in groups with only 2 channels
                 x = 1:nChannelFit;
                 y = peakVoltage(idx(x));
                 x2 = channel_distance(1:nChannelFit)';
@@ -1565,10 +1569,8 @@ end
 %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %%
 % Summary figures
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-
-CellExplorer('metrics',cell_metrics,'summaryFigures',true,'plotCellIDs',-1); % Group plot
-
 if parameters.summaryFigures
+    CellExplorer('metrics',cell_metrics,'summaryFigures',true,'plotCellIDs',-1); % Group plot
     cell_metrics.general.basepath = basepath;
     CellExplorer('metrics',cell_metrics,'summaryFigures',true);
     

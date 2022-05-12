@@ -1760,7 +1760,7 @@ end
                 for i = 1:numel(unique_uids)
                     idx_uids = uid == unique_uids(i);
                     line(raster.x(idx_uids), raster.y(idx_uids),'Marker',UI.settings.rasterMarker,'LineStyle','none','color',uid_colormap(i,:), 'HitTest','off','linewidth',3);
-                end
+                end 
             end
         end
     end

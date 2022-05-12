@@ -23,6 +23,7 @@ addParameter(p,'keepWaveforms_raw', false, @islogical); % Keep all extracted raw
 addParameter(p,'saveFig', false, @islogical); % Save figure with data
 addParameter(p,'extraLabel', '', @ischar); % Extra labels in figures
 addParameter(p,'getBadChannelsFromDat', true, @islogical); % Determining any extra bad channels from noiselevel of .dat file
+addParameter(p,'spikeTimes', '',@isnumeric); % Specific spike times to load
 
 parse(p,varargin{:})
 
@@ -36,8 +37,21 @@ keepWaveforms_filt = p.Results.keepWaveforms_filt;
 keepWaveforms_raw = p.Results.keepWaveforms_raw;
 saveFig = p.Results.saveFig;
 extraLabel  = p.Results.extraLabel;
+spikeTimes = p.Results.spikeTimes;
 params = p.Results;
 
+
+% Parse spikeTimes
+if length(unitsToProcess) > 1
+    assert(length(spikeTimes) == length(unitsToProcess),...
+        'If loading multiple units and providing spike times, must give specific times for each unit!');
+elseif ~isempty(spikeTimes) 
+    if ~iscell(spikeTimes)
+        spikeTimes = {spikeTimes};
+    end
+    nPull = max(cellfun(@length,spikeTimes));
+end
+   
 % Loading session struct into separate parameters
 basepath = session.general.basePath;
 basename = session.general.name;
@@ -136,10 +150,17 @@ g = fittype('a*exp(-x/b)+c','dependent',{'y'},'independent',{'x'},'coefficients'
 for i = 1:length(unitsToProcess)
     ii = unitsToProcess(i);
     t1 = toc(timerVal);
-    if isfield(spikes,'ts')
-        spkTmp = spikes.ts{ii}(find(spikes.ts{ii}./sr > wfWin_sec/1.8 & spikes.ts{ii}./sr < duration-wfWin_sec/1.8));
+
+    if ~isempty(spikeTimes)
+        spkTmp = spikeTimes{i};
+        % Search version
+        % spkTmp = spikes.ts{ii}(dsearchn(spikes.ts{ii}(:),spikeTimes{i}(:)));
     else
-        spkTmp = round(sr * spikes.times{ii}(find(spikes.times{ii} > wfWin_sec/1.8 & spikes.times{ii} < duration-wfWin_sec/1.8)));
+        if isfield(spikes,'ts')
+            spkTmp = spikes.ts{ii}(find(spikes.ts{ii}./sr > wfWin_sec/1.8 & spikes.ts{ii}./sr < duration-wfWin_sec/1.8));
+        else
+            spkTmp = round(sr * spikes.times{ii}(find(spikes.times{ii} > wfWin_sec/1.8 & spikes.times{ii} < duration-wfWin_sec/1.8)));
+        end
     end
     
     if length(spkTmp) > nPull
@@ -161,6 +182,7 @@ for i = 1:length(unitsToProcess)
     startIndicies2 = (spkTmp - wfWin)*nChannels+1;
     stopIndicies2 = (spkTmp + wfWin)*nChannels;
     X2 = cumsum(accumarray(cumsum([1;stopIndicies2(:)-startIndicies2(:)+1]),[startIndicies2(:);0]-[0;stopIndicies2(:)]-1)+1);
+    X2 = single(X2);
     wf = LSB * permute(reshape(double(rawData.Data(X2(1:end-1))),nChannels,(wfWin*2),[]),[2,3,1]);
     wfF = zeros((wfWin * 2),length(spkTmp),nChannels);
     for jjj = 1 : nChannels
@@ -222,7 +244,10 @@ for i = 1:length(unitsToProcess)
     end
     
     % Fitting peakVoltage sorted with exponential function with length constant
-    nChannelFit = min([16,length(goodChannels),length(electrodeGroups{spikes.shankID(ii)})]);
+    % nChannelFit = min([16,length(goodChannels),length(electrodeGroups{spikes.shankID(ii)})]);
+    nChannelFit = min([16,length(goodChannels)]);
+    % Changed because was getting less than 3 channels sometimes, think
+    % it's an error where shanks are not getting imported properly
     x = 1:nChannelFit;
     y = spikes.peakVoltage_sorted{ii}(x);
     if ~isempty(spikes.times{ii})
