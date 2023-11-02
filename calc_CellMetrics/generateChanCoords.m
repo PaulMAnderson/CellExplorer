@@ -22,13 +22,15 @@ verticalSpacing = 20; % in µm
 ngroups = session.extracellular.nElectrodeGroups;
 groups = session.extracellular.electrodeGroups.channels;
 
-if isfield(session.animal,'probeImplants')
+if isfield(session.animal,'probeImplants') && ~isempty(session.animal.probeImplants)
     source = 'probeImplants';
     layout = session.animal.probeImplants{1}.layout;
     if isfield(session.animal.probeImplants{1},'shankSpacing')
         shankSpacing = session.animal.probeImplants{1}.shankSpacing;
     end
-    verticalSpacing = session.animal.probeImplants{1}.verticalSpacing;
+    if isfield(session.animal.probeImplants{1},'verticalSpacing')
+        verticalSpacing = session.animal.probeImplants{1}.verticalSpacing;
+    end
     if ~isnumeric(verticalSpacing)
         verticalSpacing = str2num(verticalSpacing);
     end
@@ -64,7 +66,7 @@ switch(layout)
             ycoords = cat(1,ycoords,y(:))*verticalSpacing;
         end
     case 'staggered'
-        horz_offset = flip([0,8.5,17:4:520]);
+        horz_offset = flip([0,8.5,17:4:2080]);
         horz_offset(1:2:end) = -horz_offset(1:2:end);
         for a= 1:ngroups % being super lazy and making this map with loops
             x = [];

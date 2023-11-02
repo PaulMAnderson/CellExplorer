@@ -1,10 +1,10 @@
 ---
 layout: default
-title: Standard cell metrics
+title: Cell metrics
 parent: Data structure
 nav_order: 3
 ---
-# Standard cell metrics
+# Cell metrics
 {: .no_toc}
 CellExplorer used a single Matlab struct for handling all cell metrics called `cell_metrics`. The `cell_metrics` struct consists of three types of fields for handling different types of data: double, char cells and structs. Fields must be defined for all cells in the session (1xnCells). Single numeric values are saved to numeric fields with double precision, and character/string fields are saved in char cell arrays. Time series data like waveforms and session parameters are stored in standard struct fields.
 
@@ -45,14 +45,15 @@ CellExplorer used a single Matlab struct for handling all cell metrics called `c
 * `isi`: interspike intervals
   * `log10` [log-intervals spanning 1 ms : 10 s].
 * Autocorrelograms are fitted with a triple-exponential equation: 
+
 ```m
 ACG_fit = 'max(c*(exp(-(x-f)/a)-d*exp(-(x-f)/b))+h*exp(-(x-f)/g)+e,0)'
 a = tau_decay, b = tau_rise, c = decay_amplitude, d = rise_amplitude, e = asymptote, f = refrac, g = tau_burst, h = burst_amplitude
  ```
  
 $$
-ACG_{fit} = max(c\exp(\frac{-(x-t_{refrac})}{\tau_{decay}})-d\exp(\frac{-(x-t_{refrac})}{\tau_{rise}})+h\exp(\frac{-(x-t_{refrac})}{\tau_{burst}})+rate_{asymptote},0)
-$$ 
+ACG_{fit} = max(c(\exp(\frac{-(x-t_{refrac})}{\tau_{decay}})-d\exp(\frac{-(x-t_{refrac})}{\tau_{rise}}))+h\exp(\frac{-(x-t_{refrac})}{\tau_{burst}})+rate_{asymptote},0)
+$$
 
 [See the dedicated page about the fitting procedure]({{"/pipeline/acg-fit/"|absolute_url}}).
 * `acg_tau_rise` ACG tau rise (ms)
@@ -83,7 +84,7 @@ $$
 * `ab_ratio`: Waveform asymmetry; the ratio between the two positive peaks `(peakB-peakA)/(peakA+peakB)`.
 * `peakVoltage`: Peak voltage (µV) Defined from the channel with the maximum high-pass filtered waveform. `max(waveform)-min(waveform)`.
 
-<p align="center"><img src="https://buzsakilab.com/wp/wp-content/uploads/2020/01/WaveformFeatures.png" width="50%"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/petersenpeter/common_resources/main/images/WaveformFeatures.png" width="50%"></p>
 
 ### Channel maps
 Two channel maps are currently supported by CellExplorer, that are determined from the amplitude of the average waveform across channels.
@@ -103,7 +104,7 @@ Please see the [channel maps tutorial](https://cellexplorer.org/tutorials/channe
 * `putativeCellType`: Putative cell types. [See the dedicated page about cell-type classification]({{"/pipeline/cell-type-classification/"|absolute_url}}).
 
 ## Monosynaptic connections
-* `putativeConnections`: putative connections determined from cross correlograms. Contains two fields: `excitatory` and `inhibitory`, each contains connections pairs.
+* `putativeConnections`: putative connections determined from cross correlograms. Contains two fields: `excitatory` and `inhibitory`, each contains connections pairs. Transmission probabilities are also stored in  `excitatoryTransProb` and `inhibitoryTransProb`. 
 
 ## Sorting quality metrics
 Isolation distance and L-ratio as defined by [Schmitzer-Torbert et al. Neuroscience. 2005.](https://www.ncbi.nlm.nih.gov/pubmed/15680687)
@@ -112,8 +113,6 @@ Isolation distance and L-ratio as defined by [Schmitzer-Torbert et al. Neuroscie
 * `refractoryPeriodViolation`: Refractory period violation (‰): Fraction of ISIs less than 2 ms.
 
 ## Sharp wave ripple metrics
-* `ripples_modulationIndex`: strength of ripple modulation of the firing rate)
-* `ripples_modulationPeakResponseTime`: Ripple peak delay. Calculated from a ripple triggered average. The delay between the ripple peak and the peak response of the ripple triggered average response.
 * `deepSuperficial`: Deep-Superficial region assignment [Unknown, Cortical, Superficial, Deep].
 * `deepSuperficialDistance`: Deep Superficial depth relative to the reversal of the sharp wave. (in um).
 
@@ -121,7 +120,7 @@ Isolation distance and L-ratio as defined by [Schmitzer-Torbert et al. Neuroscie
 * `thetaPhasePeak`: Theta phase peak
 * `thetaPhaseTrough`: Theta phase trough
 * `thetaEntrainment`: Theta entrainment
-* `thetaModulationIndex`: Theta modulation index. Originally defined in [Cacucci et al., JNeuro 2004](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2683733/). Computed as the difference between the theta modulation trough (defined as mean of autocorrelogram bins, 50-70 msec) and the theta modulation peak (mean of autocorrelogram bins, 100-140 msec) over their sum.
+* `thetaModulationIndex`: Theta modulation index. Originally defined in [Cacucci et al., JNeuro 2004](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2683733/). Computed as the difference between the theta modulation trough (defined as mean of autocorrelogram bins, 50-70 msec) and the theta modulation peak (mean of autocorrelogram bins, 100-140 msec) over their sum, scaled from -1 to 1.
 
 ## Firing rate maps
 * `firingRateMaps`: (spatial) firing rate maps.
@@ -142,9 +141,17 @@ The spatial metrics are all based on average firing rate map.
 
 ## Event metrics
 * `events`: event time series.
+* `eventName_modulationIndex`: strength of modulation. The difference between the averages of the stimulation interval and the pre-stimulation interval (the baseline) divided by their sum. Scaled from -1 to 1.
+* `eventName_modulationRatio`: strength of modulation. The ratio between the averages of the stimulation interval and the pre-stimulation interval (the baseline). 
+* `eventName_modulationPeakResponseTime`: temporal response. The delay between the ripple peak and the peak response of the ripple triggered average response.
+* `eventName_modulationSignificanceLevel`: KS-test (`kstest2`) between the stimulation values and the pre-stimulation values, pre-smoothing.
 
 ## Manipulation metrics
 * `manipulations`: manipulations time series.
+* `manipulationName_modulationIndex`: strength of modulation. The difference between the averages of the stimulation interval and the pre-stimulation interval (the baseline) divided by their sum. Scaled from -1 to 1.
+* `manipulationName_modulationRatio`: strength of modulation. The ratio between the averages of the stimulation interval and the pre-stimulation interval (the baseline). 
+* `manipulationName_modulationPeakResponseTime`: temporal response. The delay between the ripple peak and the peak response of the ripple triggered average response.
+* `manipulationName_modulationSignificanceLevel`: KS-test (`kstest2`) between the stimulation values and the pre-stimulation values, pre-smoothing.
 
 ## Response curve metrics
 * `responseCurves`: response curves.

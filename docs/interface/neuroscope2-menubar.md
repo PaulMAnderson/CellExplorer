@@ -22,7 +22,10 @@ Here is a detailed description of each of the menu elements of NeuroScope2.
 | Elements | Description       | 
 |:-------------|:------------------|
 | About NeuroScope2 | Shows dialog with basic info about NeuroScope2 |
+| Benchmark NeuroScope2 | Perform a benchmark of NeuroScope2 testing its performance with a variable number of channels and windows widths |
+| Perform test suite of NeuroScope2 | Performs tests of most actions available in the side menu. The test suite can also be executed from the terminal by providing the parameter as an input: `NeuroScope2('performTestSuite',true)`. |
 | Quit               | Quit NeuroScope2. This will save automatically save the session metadata. Closing the main window has the same effect. |
+
 
 ### File
 
@@ -31,9 +34,7 @@ Here is a detailed description of each of the menu elements of NeuroScope2.
 | Load session from folder              | Opens a file dialog where you can select a folder to load | 
 | Load session from file                | Opens a file dialog where you can select a file to load | 
 | Recent sessions...                    | Shows a list of recently active sessions. | 
-| Export to .png file (image)           | Exports screenshot to .png file as image graphics | 
-| Export to .pdf file (vector graphics) | Exports screenshot to .pdf file as vector graphics | 
-| Export figure via the export setup dialog | Export figure via the export setup dialog | 
+| Export figure data..          		| Exports figure data to .png (image graphics), a .pdf file (vector graphics), or via the export setup dialog | 
 
 
 ### Session
@@ -91,6 +92,9 @@ This menu is for lab members that has credentials to the Buzsaki lab databank at
 | Show detected spikes below traces | __boolean__ Shows detected spike raster below traces. | 
 | Debug | Toggle debug mode | 
 
+### Analysis
+
+Please see the [dedicated page](https://cellexplorer.org/interface/neuroscope2-analysis/) about performing custom analysis directly from NeuroScope2.
 
 ### Help
 

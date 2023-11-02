@@ -8,7 +8,7 @@ nav_order: 1
 
 # UI elements of NeuroScope2
 
-<a href="https://buzsakilab.com/wp/wp-content/uploads/2021/11/NeuroScope2.png">![NeuroScope2](https://buzsakilab.com/wp/wp-content/uploads/2022/03/NeuroScope2_screenshot_1_lowress.jpg)</a>
+<a href="https://raw.githubusercontent.com/petersenpeter/common_resources/main/images/NeuroScope2.png">![NeuroScope2](https://raw.githubusercontent.com/petersenpeter/common_resources/main/images/NeuroScope2_screenshot_1_lowress.jpeg)</a>
 
 
 ### NeuroScope2 interface elements
@@ -37,10 +37,12 @@ The interface consists of a side panel, a main plot axis and a navigation bar be
    - Spectrogram
    - Current Source density visualization
    - RMS noise inset
+   - Instantaneous metrics
+   - Audio playback during streaming
 
 There are [keyboard shortcuts]({{"/interface/neuroscope2-keyboard-shortcuts/"|absolute_url}}) that allow you to quickly navigate your data. Press `H` in NeuroScope2 to see the keyboard shortcuts.
 
-<a href="https://buzsakilab.com/wp/wp-content/uploads/2021/12/NeuroScope2_side_menu.png">![NeuroScope2 side menu](https://buzsakilab.com/wp/wp-content/uploads/2021/12/NeuroScope2_side_menu.png)</a>
+<a href="https://raw.githubusercontent.com/petersenpeter/common_resources/main/images/NeuroScope2_side_menu.png">![NeuroScope2 side menu](https://raw.githubusercontent.com/petersenpeter/common_resources/main/images/NeuroScope2_side_menu.png)</a>
 
 ## General tab
 
@@ -68,7 +70,7 @@ When navigating a recording, only data not currently in memory (shown on the scr
 
 + `Plot color`: Allows you to select from four color intensities (100%, 75%, 50%, and 25%) and four grey scale intensities (100%, 75%, 50%, and 25%) for the ephys traces. Use this when projecting spikes or events on the traces to better highlight them. 
 
-<a href="https://buzsakilab.com/wp/wp-content/uploads/2021/12/trace_colors.jpg">![Trace color](https://buzsakilab.com/wp/wp-content/uploads/2021/12/trace_colors.jpg)</a>
+<a href="https://raw.githubusercontent.com/petersenpeter/common_resources/main/images/trace_colors.jpeg">![Trace color](https://raw.githubusercontent.com/petersenpeter/common_resources/main/images/trace_colors.jpeg)</a>
 
 + `Filter traces`: Apply a filter to the traces using the Lower and Higher filter setting input fields. If the Lower filter field is empty, only a low-pass filter will be applied. If the Higher filter is empty, only a high-pass filter will be applied. The filter applied is a 3rd order Zero-phase digital butter filter (filter function: `filtfilt`, filter design: `butter`).
 
@@ -134,11 +136,16 @@ Events files (basename.eventName.events.mat) are automatically detected and list
 + `Below traces`: Show events below the ephys traces.
 + `Intervals`: Show intervals for each event if the data is available.
 + `Processing`: Show extra field data available from subfields in the events struct: `eventName.processing_steps.*`
++ `Save events`: Save any changes to the applied events file.
 + `Event number text field`: Navigate to specific event. Shows the current active event.  
 + `Random`: Navigate to a random event.
 + `Flag event`: Flag selected event. Flagged events are saved to the events struct `eventName.flagged` by their index id. Make sure to save the events before closing CellExplorer. 
-+ `Manual event`: Create an event manually by clicking the traces. Added events are saved to the events struct `eventName.added` by the timestamps. Make sure to save the events before closing CellExplorer. Manually added events are color coded magenta. Events can be deleted again by right clicking the events on the plot
++ `+ event`: Create an event manually by clicking the traces. Added events are saved to the events struct `eventName.added` by the timestamps. Manually added events are color coded magenta. Events can be deleted again by right clicking the events on the plot
++ `+ interval`: Create intervals manually by clicking the traces. Added intervals are saved to the events struct `eventName.added_intervals`. Manually added intervals are color coded blue. The boundaries of the intervals are defined by left mouse clicks, complete with right mouse click, cancel last point with middle mouse click. Intervals to color coded blue.
++ `- interval`: Remove intervals manually by clicking the traces. Removed intervals are only affecting the manually selected intervals, which are saved to `eventName.added_intervals`. The boundaries of the intervals to remove are defined by left mouse clicks, complete with right mouse click, cancel last point with middle mouse click. Intervals to delete er color coded red.
 
+{: .note}
+> Make sure to save events before closing CellExplorer if changes has been made.
 
 ### Time series
 Time series files (basename.timeseriesName.timeseries.mat) are automatically detected and listed in the drop-down field. Select from the list to load it.
@@ -163,7 +170,12 @@ Shows a Current Source Density (CSD) on top of the ephys traces.
 ### RMS noise inset
 Shows a RMS noise inset for all channel in the upper right corner. The raw traces, the current filters or a custom filter can be used. The custom filter is specified by the lower and higher filter settings (Hz). The filter applied is a 3rd order Zero-phase digital butter filter. 
 
-<a href="https://buzsakilab.com/wp/wp-content/uploads/2022/03/NeuroScope2_screenshot_spectrogram.png">![CellExplorer](https://buzsakilab.com/wp/wp-content/uploads/2022/03/NeuroScope2_screenshot_spectrogram_lowress.jpg)</a>
+<a href="https://raw.githubusercontent.com/petersenpeter/common_resources/main/images/NeuroScope2_screenshot_spectrogram.png">![CellExplorer](https://raw.githubusercontent.com/petersenpeter/common_resources/main/images/NeuroScope2_screenshot_spectrogram_lowress.jpeg)</a>
 
 The screenshot above shows a 128 channels recording with a spectrogram shown below the traces for the channel highlighted in white. A RMS-noise channel-inset is shown in the upper right corner, showing the signal RMS-amplitude across the color-coded channels, The RMS-amplitude was calculated from the filtered traces (custom filter: 100Hz to 220Hz) . The spike raster is color-coded and sorted by putative cell types.
 
+### Instantaneous metrics
+Shows the instantaneous power, phase, frequency and filtered trace from a single channel with custom filters. The channel and filter boundaries can be adjusted. The instantaneous traces are shown below the ephys traces. The filter is a third-order butter filter applied in both directions (`filtfilt`). The phase and power is calcuated from the hilbert transform. The frequency is calculated from the unwrapped phase: `frequency = diff(unwrap(phase))./diff(timestamps)/(2*pi)`.
+
+### Audio playback during streaming
+The traces of a one or two channels can be played as a continues audio trace as you are streaming a recording. You can select gain and specific channels to listen to (one or two channels). The audio playback is done after the filters are applied.

@@ -81,6 +81,7 @@ UI.preferences.plot3axis = 0;
 UI.preferences.raster = 'cv2';
 % UI.preferences.raster = 'firingRateISI';
 UI.preferences.displayMenu = 0; 
+UI.preferences.shuffleLayout = 1;
 
 UI.preferences.referenceData = 'None'; 
 UI.preferences.groundTruthData = 'None'; 

@@ -345,6 +345,9 @@ if exist('parameters','var') && ~isempty(parameters)
         classification_schema_value = 1;
     else
         classification_schema_list = what('celltype_classification');
+        if length(classification_schema_list)>1
+            classification_schema_list = classification_schema_list(1);
+        end
         classification_schema_list = cellfun(@(X) X(1:end-2),classification_schema_list.m,'UniformOutput', false);
         
         classification_schema_value = find(strcmp(parameters.preferences.putativeCellType.classification_schema,classification_schema_list));
@@ -478,7 +481,6 @@ UI.edit.strain = uicontrol('Parent',UI.tabs.animal,'Style', 'popup', 'String', U
 
 uicontrol('Parent',UI.tabs.animal,'Style', 'text', 'String', 'Genetic line', 'Position', [10, 400, 280, 20],'HorizontalAlignment','left', 'fontweight', 'bold','Units','normalized');
 UI.edit.geneticLine = uicontrol('Parent',UI.tabs.animal,'Style', 'Edit', 'String', '', 'Position', [10, 375, 280, 25],'HorizontalAlignment','left','Units','normalized','tooltip',sprintf('Genetic line of animal subject (e.g. Wild type)'));
-
 
 UI.animalMetadata = uitabgroup('units','pixels','Position',[0, 0, 616, 365],'Parent',UI.tabs.animal,'Units','normalized');
 
@@ -1010,11 +1012,16 @@ uiwait(UI.fig)
                         end
                     else
                         display = animalMetaType.(animalMetaType.field_relationship{i}).display;
-                        text1 = session.animal.(datatype){fn}.(display{1});
-                        for j = 2:numel(display)
-                            text1 = [text1,' - ',session.animal.(datatype){fn}.(display{j})];
+                        if isfield(session.animal.(datatype){fn},display{1})
+                            text1 = session.animal.(datatype){fn}.(display{1});
+                            for j = 2:numel(display)
+                                text1 = [text1,' - ',session.animal.(datatype){fn}.(display{j})];
+                            end
+                            tableData{fn,i+1} = text1;
+                        else
+                            tableData{fn,i+1} = 'Unknown';
                         end
-                        tableData{fn,i+1} = text1;
+                        
                     end
                 end
             end
@@ -1241,7 +1248,7 @@ uiwait(UI.fig)
         else
             session.extracellular.chanCoords.shankSpacing = [];
         end
-        if ~isempty(UI.edit.chanCoords_shankSpacing.String) 
+        if ~isempty(UI.edit.chanCoords_verticalSpacing.String)
             session.extracellular.chanCoords.verticalSpacing = str2double(UI.edit.chanCoords_verticalSpacing.String);
         else
             session.extracellular.chanCoords.verticalSpacing = [];
@@ -1375,14 +1382,17 @@ uiwait(UI.fig)
 
     function saveSessionFile
         if ~contains(pwd,UI.edit.basepath.String)
-            answer = questdlg('Where would you like to save the session struct to?','Location','basepath','Select location','basepath');
+            answer = questdlg(['Where would you like to save the session struct to? basepath=' UI.edit.basepath.String,' pwd=',pwd],'basepath different from pwd','basepath','pwd','Select location','basepath');
         else
             answer = 'basepath';
         end
         switch answer
             case 'basepath'
                 filepath1 = UI.edit.basepath.String;
-                filename1 = [UI.edit.session.String,'.session.mat'];            
+                filename1 = [UI.edit.session.String,'.session.mat'];  
+            case 'pwd'
+                filepath1 = pwd;
+                filename1 = [UI.edit.session.String,'.session.mat']; 
             case 'Select location'
                 [filename1,filepath1] = uiputfile([UI.edit.session.String,'.session.mat']);
             otherwise
@@ -1974,7 +1984,7 @@ uiwait(UI.fig)
         uicontrol('Parent',UI.dialog.tags,'Style', 'text', 'String', ['Channels (nChannels = ',num2str(session.extracellular.nChannels),')'], 'Position', [10, 223, 230, 20],'HorizontalAlignment','left');
         tagsChannels = uicontrol('Parent',UI.dialog.tags,'Style', 'Edit', 'String', initChannels, 'Position', [10, 100, 480, 125],'HorizontalAlignment','left','Min',1,'Max',10);
         
-        uicontrol('Parent',UI.dialog.tags,'Style', 'text', 'String', ['Spike group (nElectrodeGroups = ',num2str(session.extracellular.nElectrodeGroups),')'], 'Position', [10, 73, 480, 20],'HorizontalAlignment','left');
+        uicontrol('Parent',UI.dialog.tags,'Style', 'text', 'String', ['Electrode groups (nElectrodeGroups = ',num2str(session.extracellular.nElectrodeGroups),')'], 'Position', [10, 73, 480, 20],'HorizontalAlignment','left');
         tagsElectrodeGroups = uicontrol('Parent',UI.dialog.tags,'Style', 'Edit', 'String', initElectrodeGroups, 'Position', [10, 50, 480, 25],'HorizontalAlignment','left');
         
         uicontrol('Parent',UI.dialog.tags,'Style','pushbutton','Position',[10, 10, 230, 30],'String','Save tag','Callback',@(src,evnt)CloseTags_dialog);
@@ -2306,7 +2316,7 @@ uiwait(UI.fig)
         uiwait(UI.dialog.epochs);
         
         function CloseEpochs_dialog
-            if ~strcmp(epochsName.String,'') && isvarname(epochsName.String)
+            if ~strcmp(epochsName.String,'')
                 SelectedEpoch = epochIn;
                 if ~isempty(epochsName.String)
                     session.epochs{SelectedEpoch}.name = epochsName.String;
@@ -2463,7 +2473,7 @@ uiwait(UI.fig)
         uiwait(UI.dialog.behaviors);
         
         function CloseBehaviors_dialog
-            if ~strcmp(behaviorsFileNames.String,'') && isvarname(behaviorsFileNames.String)
+            if ~strcmp(behaviorsFileNames.String,'')
                 SelectedBehavior = behaviorIn;
                 if ~isempty(behaviorsFileNames.String)
                     session.behavioralTracking{SelectedBehavior}.filenames = behaviorsFileNames.String;
@@ -2665,7 +2675,6 @@ uiwait(UI.fig)
         
         function CloseSorting_dialog
             if strcmp(spikeSortingRelativePath.String,'') || isempty(regexp(spikeSortingRelativePath.String, '[/\*:?"<>|]', 'once'))
-                % isvarname(spikeSortingRelativePath.String)
                 SelectedBehavior = behaviorIn;
                 session.spikeSorting{SelectedBehavior}.method = spikeSortingMethod.String{spikeSortingMethod.Value};               
                 session.spikeSorting{SelectedBehavior}.format = spikeSortinFormat.String{spikeSortinFormat.Value};               
@@ -3409,30 +3418,38 @@ uiwait(UI.fig)
     end
     
     function importChannelMap1(~,~)
-        answer = questdlg('What format do you want to import?','Import channel coordinates','Channel coordinates (chancoords)', 'Channelmap (chanmap)','Cancel','Channel coordinates (chancoords)');
+        answer = questdlg('What format do you want to import?','Import channel coordinates','Channel coordinates (chancoords)', 'Channelmap (KiloSort)','Cancel','Channel coordinates (chancoords)');
         if ~isempty(answer)
             if strcmp(answer,'Channel coordinates (chancoords)')
                 chanCoords_filepath =fullfile(session.general.basePath,[session.general.name,'.chanCoords.channelInfo.mat']);
                 if exist(chanCoords_filepath,'file')
-                    session.extracellular.chanCoords = loadStruct('chanCoords','channelInfo','session',session);
-                    updateChanCoords;
-                    plotChannelMap1
-                    MsgLog(['Imported channel coordinates from basepath: ' chanCoords_filepath],2)
+                    try
+                        session.extracellular.chanCoords = loadStruct('chanCoords','channelInfo','session',session);
+                        updateChanCoords;
+                        plotChannelMap1
+                        MsgLog(['Imported channel coordinates from basepath: ' chanCoords_filepath],2)
+                    catch
+                        MsgLog('chanCoords import failed:',4)
+                    end
                 else
                     MsgLog(['chanCoords file not available: ' chanCoords_filepath],4)
                 end
             elseif strcmp(answer,'Channelmap (chanmap)')
                 [file,basepath] = uigetfile('*.mat','Please select the chanMap.mat file','chanMap.mat');
                 if ~isequal(file,0)
-                    temp = load(fullfile(basepath,file));
-                    session.extracellular.chanCoords.x = nan(session.extracellular.nChannels,1);
-                    session.extracellular.chanCoords.y = nan(session.extracellular.nChannels,1);
-                    session.extracellular.chanCoords.x(temp.chanMap) = temp.xcoords(:);
-                    session.extracellular.chanCoords.y(temp.chanMap) = temp.ycoords(:);
-                    session.extracellular.chanCoords.source = 'chanMap.mat';
-                    updateChanCoords; 
-                    plotChannelMap1
-                    MsgLog(['Imported channel map: ' file],2)
+                    try
+                        temp = load(fullfile(basepath,file));
+                        session.extracellular.chanCoords.x = nan(session.extracellular.nChannels,1);
+                        session.extracellular.chanCoords.y = nan(session.extracellular.nChannels,1);
+                        session.extracellular.chanCoords.x(temp.chanMap) = temp.xcoords(:);
+                        session.extracellular.chanCoords.y(temp.chanMap) = temp.ycoords(:);
+                        session.extracellular.chanCoords.source = 'chanMap.mat';
+                        updateChanCoords;
+                        plotChannelMap1
+                        MsgLog(['Imported channel map: ' file],2)
+                    catch
+                        MsgLog('Channelmap import failed',4)
+                    end
                 end
             end
         end
@@ -3472,19 +3489,32 @@ uiwait(UI.fig)
             chanCoords = session.extracellular.chanCoords;
             x_range = range(chanCoords.x);
             y_range = range(chanCoords.y);
-            if x_range > y_range
+            if x_range > y_range                
                 fig_width = 1600;
-                fig_height = ceil(fig_width*y_range/x_range)+200;
+                fig_height = 2*(ceil(fig_width*y_range/x_range)+200);
             else
                 fig_height = 1000;
-                fig_width = ceil(fig_height*x_range/y_range)+200;
+                fig_width = 2*(ceil(fig_height*x_range/y_range)+200);
             end
             fig1 = figure('Name','Channel coordinates','position',[5,5,fig_width,fig_height],'visible','off'); movegui(fig1,'center')
-            ax1 = axes(fig1);
+            
+            if x_range > y_range
+                ax1 = subplot(2,1,1, 'Parent', fig1);
+            else
+                ax1 = subplot(1,2,1, 'Parent', fig1);
+            end
+            plot(ax1,chanCoords.x,chanCoords.y,'.k','markersize',12), hold on
+            title(ax1,{' ','Channel coordinates',' '}), xlabel(ax1,'X (um)'), ylabel(ax1,'Y (um)'), axis padded
+            
+            if x_range > y_range
+                ax1 = subplot(2,1,2, 'Parent', fig1);
+            else
+                ax1 = subplot(1,2,2, 'Parent', fig1);
+            end
             plot(ax1,chanCoords.x,chanCoords.y,'.k'), hold on
             text(ax1,chanCoords.x,chanCoords.y,num2str([1:numel(chanCoords.x)]'),'VerticalAlignment', 'bottom','HorizontalAlignment','center');
-            title(ax1,{' ','Channel coordinates',' '}), xlabel(ax1,'X (um)'), ylabel(ax1,'Y (um)')
-            set(fig1,'visible','on')
+            title(ax1,{' ','Channel coordinates',' '}), xlabel(ax1,'X (um)'), ylabel(ax1,'Y (um)'), axis padded
+            set(fig1,'visible','on');
         else
             MsgLog('No channel coords data available',4)
         end

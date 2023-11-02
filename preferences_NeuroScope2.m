@@ -15,7 +15,7 @@ preferences.plotStyle = 2; % Plot style
 preferences.greyScaleTraces = 1; % Plot colors
 preferences.channelOrder = 1; % Channel order
 preferences.plotTracesInColumns = false; % Plot traces in columns
-preferences.colorByChannels = false; % Color by channel order
+preferences.colorByChannels = 1; % Color by channel order
 preferences.nColorGroups = 10; % Number of color groups when coloring by channel order
 preferences.displayMenu = 0; % Show the regular Matlab menu
 preferences.background = [0 0 0]; % Background color
@@ -30,6 +30,9 @@ preferences.resetZoomOnNavigation = false;
 preferences.replayRefreshInterval = 0.50; % Fraction of window updated in replay mode
 preferences.insetRelativeWidth = 1/4;
 preferences.insetRelativeHeight = 1/4;
+preferences.stickySelection = false;
+preferences.to_save = {'windowDuration','plotStyle','greyScaleTraces','colormap','scalingFactor','background','textBackground','primaryColor',...
+    'extraSpacing','plotTracesInColumns','showChannelNumbers','showScalebar','narrowPadding','stickySelection','resetZoomOnNavigation'};
 
 if ismac
     preferences.fontsize = 11;
@@ -57,16 +60,20 @@ preferences.medianFilter = false; % Apply median filter
 preferences.removeDC = false;     % Remove DC from traces
 preferences.detectSpikes = false; % Detect spikes from high-pass filtered traces
 preferences.spikesDetectionThreshold = -100; % in micro V
+preferences.spikesDetectionPolarity = false; % Detect spikes with both polarity
 preferences.showWaveformsBelowTrace = true;
 preferences.showDetectedSpikeWaveforms = false;
 preferences.showDetectedSpikesPCAspace = false;
+preferences.showDetectedSpikesPopulationRate = false;
 preferences.colorDetectedSpikesByWidth = false;
 preferences.interneuronMaxWidth = 0.5; % in ms
 preferences.waveformsRelativeWidth = 1/16;
+preferences.spikeWaveformWidth = 0.0008; % in ms. Default: 2*0.8ms window size
+preferences.filterMethod = 'filtfilt'; % filter or filtfilt
 
 % Performance settings
 preferences.plotStyleDynamicRange = true; % If true, in the range plot mode, all samples will be shown below a temporal threshold (default: 1.2 sec)
-preferences.plotStyleDynamicThreshold = 24000; % in samples, threshold for switching between range and raw data presentation (Matlab plots linearly fast up to a certain number of points after which the performance changes and the range plotting style becomes faster)
+preferences.plotStyleDynamicThreshold = 23000; % in samples, threshold for switching between range and raw data presentation (Matlab's plot scales linearly with samples and channels certain number of points after which the performance changes and the range plotting style becomes faster)
 preferences.plotStyleRangeSamples = 4; % average samples per second of data. Default: 4; Higher value will show less data points
 
 % Spikes settings
@@ -76,7 +83,7 @@ preferences.spikesYData = ''; % Metric applied to sort spikes shown below the tr
 preferences.spikesColormap = 'hsv'; % The colormap applied to units
 preferences.spikesGroupColors = 1;
 preferences.showPopulationRate = false;
-preferences.populationRateBelowTrace = false;
+preferences.populationRateBelowTrace = true;
 preferences.populationRateWindow = 0.001; % seconds
 preferences.populationRateSmoothing = 35; % nBins
 preferences.spikeRasterLinewidth = 1.2;
@@ -99,10 +106,6 @@ preferences.iEvent = 1;
 preferences.showEventsBelowTrace = false;
 preferences.showEventsIntervals = false;
 preferences.processing_steps = false;
-
-% Timeseries settings
-preferences.timeseries.lowerBoundary = 34;
-preferences.timeseries.upperBoundary = 38;
 
 % Behavior settings
 preferences.plotBehaviorLinearized = false;
@@ -133,8 +136,13 @@ preferences.plotRMSnoise_higherBand = 220;
 % Instantaneous metrics plot
 preferences.instantaneousMetrics.show = false;
 preferences.instantaneousMetrics.showPower = false;
-preferences.instantaneousMetrics.showFrequency = false;
+preferences.instantaneousMetrics.showSignal = false;
 preferences.instantaneousMetrics.showPhase = false;
 preferences.instantaneousMetrics.channel = 1;
 preferences.instantaneousMetrics.lowerBand = 100;
 preferences.instantaneousMetrics.higherBand = 220;
+
+% Audio
+% only works together with the DSP System Toolbox or the Audio Toolbox
+preferences.audioChannels = [1,2]; % Up to two channels can be selected
+preferences.audioGain = 3; % Gain factor, recommended: 1:5 = 1,2,5,10,20

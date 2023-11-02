@@ -64,6 +64,8 @@ A MATLAB struct `session` stored in a .mat file: `basename.session.mat`. The ses
   * `geneticLine` : genetic line of animal
   * `probeImplants` : struct-array with probe implants information
     * `probe` : Name of probe implanted
+    * `supplier` : Name of probe supplier
+    * `descriptiveName` : Descriptive name of probe
     * `brainRegion` : brain region
     * `ap` : Anterior-Posterior coordinate (mm)
     * `ml` : Medial-Lateral coordinate (mm)
@@ -73,12 +75,13 @@ A MATLAB struct `session` stored in a .mat file: `basename.session.mat`. The ses
     * `rotation` : rotation of probe (degrees)
   * `opticFiberImplants` : struct-array with optic fiber implants information
     * `opticFiber` : Name of optic fiber implanted
+    * `supplier` : Name of optic fiber supplier
     * `brainRegion` : brain region
     * `ap` : Anterior-Posterior coordinate (mm)
     * `ml` : Medial-Lateral coordinate (mm)
     * `depth` : Implantation depth (mm)
-    * `ap_angle` : ap-angle of probe implantation (degrees)
-    * `ml_angle` : ml angle of probe implantation (degrees)
+    * `ap_angle` : ap-angle of optic fiber implantation (degrees)
+    * `ml_angle` : ml angle of optic fiber implantation (degrees)
     * `notes` : notes
   * `surgeries` : struct-array with surgery information
     * `date` : date of surgery
@@ -102,8 +105,8 @@ A MATLAB struct `session` stored in a .mat file: `basename.session.mat`. The ses
     * `ap` : Anterior-Posterior coordinate (mm)
     * `ml` : Medial-Lateral coordinate (mm)
     * `depth` : Implantation depth (mm)
-    * `ap_angle` : ap-angle of probe implantation (degrees)
-    * `ml_angle` : ml angle of probe implantation (degrees)
+    * `ap_angle` : ap-angle of virus injection (degrees)
+    * `ml_angle` : ml angle of virus injection (degrees)
     * `notes` : notes
 * `epochs`
   * `name`
@@ -114,8 +117,9 @@ A MATLAB struct `session` stored in a .mat file: `basename.session.mat`. The ses
   * `startTime`
   * `stopTime`
 * `extracellular`
-  * `equipment` : hardware used to acquire the data
-  * `fileFormat` : format of the raw data
+  * `equipment` : hardware used to acquire the data  
+  * `fileFormat` : file format of the raw data file (e.g. dat or bin)
+  * `fileName` : name of the raw data file (can also be a relative path to the raw data file)
   * `sr` : sampling rate
   * `nChannels` : number of channels
   * `nSamples` : number of samples
@@ -136,6 +140,7 @@ A MATLAB struct `session` stored in a .mat file: `basename.session.mat`. The ses
     * `source` : Source of channel coordinates
     * `layout` : Probe layout (e.g. linear,staggered,poly2,poly3,poly4,poly5)
     * `shankSpacing` : Shank spacing (in µm)
+    * `verticalSpacing` : Vertical spacing between channels (in µm)
 * `brainRegions`
   * `regionAcronym` : e.g. CA1 or HIP, Allen institute Atlas
     * `brainRegion` 
@@ -153,7 +158,7 @@ A MATLAB struct `session` stored in a .mat file: `basename.session.mat`. The ses
 * `inputs`
   * `inputTag` : unique name, e.g. temperature, stimPulses, OptitrackTTL
     * `equipment` : hardware used to acquire the data
-    * `inputType` : adc, aux, dat, dig ...
+    * `inputType` : adc, aux, dig, dat, ...
     * `channels` : list of channels (1-indexed)
     * `description`
 * `analysisTags`
@@ -178,9 +183,9 @@ A MATLAB struct `session` stored in a .mat file: `basename.session.mat`. The ses
     * `equipment` : hardware used to acquire the data
 
 ### Spikes
-A MATLAB struct `spikes` stored in a .mat file: `basename.spikes.cellinfo.mat`. It can be generated with [loadSpikes.m](https://github.com/petersenpeter/CellExplorer/blob/master/calc_CellMetrics/loadSpikes.m). The processing module `ProcessCellMetrics.m` used the script `loadSpikes.m`, to automatically load spike-data from either KiloSort, Phy or Neurosuite and saves it to a spikes struct. `basename.spikes.cellinfo.mat` is saved to the basepath. The struct has the following fields:
-* `ts`: a 1xN cell-struct for N units each containing a 1xM vector with M spike events in samples.
-* `times`: a 1xN cell-struct for N units each containing a 1xM vector with M spike events in seconds.
+A MATLAB struct `spikes` stored in a .mat file: `basename.spikes.cellinfo.mat`. It can be generated with [loadSpikes.m](https://github.com/petersenpeter/CellExplorer/blob/master/calc_CellMetrics/loadSpikes.m). The processing module `ProcessCellMetrics.m` used the script `loadSpikes.m`, to load spike-data from various pipelines/data formats, including KiloSort, Phy, and Neurosuite and saves it to a spikes struct: `basename.spikes.cellinfo.mat`, which is saved to the basepath. The struct has the following fields:
+* `ts`: a 1xN cell-struct for N units each containing a [nSpikes x 1] vector with nSpikes spike events in samples.
+* `times`: a 1xN cell-struct for N units each containing a [nSpikes x 1] vector with nSpikes spike events in seconds.
 * `cluID`: a 1xN vector with inherited IDs from the applied clustering algorithm.
 * `UID`: a 1xN vector with values 1:N.
 * `shankID`: a 1xN vector containing the corresponding shank/electrode-group each unit (1-indexed).
@@ -209,39 +214,45 @@ The cell metrics are kept in a `cell_metrics` struct as [described here]({{"/dat
 
 ### Events
 This is a data container for event data. A MATLAB struct `eventName` stored in a .mat file: `basename.eventName.events.mat` with the following fields:
-* `timestamps`: Px2 matrix with intervals for the P events in seconds.
-* `peaks`: Event time for the peak of each events in seconds (Px1).
-* `amplitude`: amplitude of each event (Px1).
+* `timestamps`: [nEvents x 2] matrix with intervals for the nEvents in units of seconds.
+* `peaks`: Event time for the peak of each events in seconds (nEvents x 1).
+* `amplitude`: amplitude of each event (nEventsx1).
 * `amplitudeUnits`: specify the units of the amplitude vector.
-* `eventID`: numeric ID for classifying various event types  (Px1).
-* `eventIDlabels`: cell array with labels for classifying various event types defined in stimID (cell array, Px1).
+* `eventID`: numeric ID for classifying various event types  (nEvents x 1).
+* `eventIDlabels`: cell array with labels for classifying various event types defined in stimID (cell array, nEvents x 1).
 * `eventIDbinary`: boolean specifying if eventID should be read as binary values (default: false).
-* `center`: center time-point of event (in seconds; calculated from timestamps; Px1).
-* `duration`: duration of event (in seconds; calculated from timestamps; Px1).
+* `center`: center time-point of event (in seconds; calculated from timestamps; nEvents x 1).
+* `duration`: duration of event (in seconds; calculated from timestamps; nEvents x 1).
 * `detectorinfo`: info about how the events were detected.
+  * `detectorname`: Name of detector scriptdetectiondate.
+  * `detectiondate`: Detection date.
+  * `detectionintervals`: Detection intervals.
+  * `detectionparms`: Detection parameters.
+  * `detectionchannel`: Detection cahnnel (0-indexed).
+  * `detectionchannel1`: Detection cahnnel (1-indexed).
 
 The `*.events.mat` files should be stored in the basepath. Any `events` files located in the basepath will be detected in the pipeline `ProcessCellMetrics.m` and an average PSTHs will be generated.
 
 ### Manipulations
 This is a data container for manipulation data. A MATLAB struct `manipulationName` stored in a .mat file: `basename.eventName.manipulation.mat` with the following fields:
-* `timestamps`: Px2 matrix with intervals for the P events in seconds.
-* `peaks`: Event time for the peak of each events in seconds (Px1).
-* `amplitude`: amplitude of each event (Px1).
+* `timestamps`: [nEvents x 2] matrix with intervals for the nEvents in units of seconds.
+* `peaks`: Event time for the peak of each events in seconds (nEvents x 1).
+* `amplitude`: amplitude of each event (nEvents x 1).
 * `amplitudeUnits`: specify the units of the amplitude vector.
-* `eventID`: numeric ID for classifying various event types  (Px1).
-* `eventIDlabels`: cell array with labels for classifying various event types defined in stimID (cell array, Px1).
+* `eventID`: numeric ID for classifying various event types  (nEvents x 1).
+* `eventIDlabels`: cell array with labels for classifying various event types defined in stimID (cell array, nEvents x 1).
 * `eventIDbinary`: boolean specifying if eventID should be read as binary values (default: false).
-* `center`: center time-point of event (in seconds; calculated from timestamps; Px1).
-* `duration`: duration of event (in seconds; calculated from timestamps; Px1).
+* `center`: center time-point of event (in seconds; calculated from timestamps; nEvents x 1).
+* `duration`: duration of event (in seconds; calculated from timestamps; nEvents x 1).
 * `detectorinfo`: info about how the events were detected.
 
 The `*.manipulation.mat` files should be stored in the basepath. `events` and `manipulation` files are similar in content, but only manipulation intervals are excluded in the pipeline. Any `manipulation` files located in the basepath will be detected in the pipeline (ProcessCellMetrics.m) and an average PSTH will be generated. Events and manipulation files are similar in content, but only manipulation intervals are excluded in the pipeline.
 
 ### Channels
 This is a data container for channel-wise data. A MATLAB struct `ChannelName` stored in a .mat file: `basename.ChannelName.channelinfo.mat` with the following optional fields:
-* `data`: a QxN data container (optional). N number of data points per channel.
-* `channel`: a Qx1 vector containing a list of Q channel indexes (1-indexed).
-* `channelClass`: a Qx1 cell with classification assigned to each channel (char).
+* `data`: a [nSamples x nChannels] data container (optional). 
+* `channel`: a [nChannels x 1] vector containing a list of channel (1-indexed).
+* `channelClass`: a [nChannels x 1] cell with classification assigned to each channel (char).
 * `processinginfo`: a struct with information about how the mat file was generated including the name of the function, version, date and parameters.
 * `detectorinfo`: If the channelinfo struct is based on determined events, detectorinfo contains info about how the event was processed.
 
@@ -249,26 +260,27 @@ The `*.channelinfo.mat` files should be stored in the basepath.
 
 __Channels coordinates__
 `chanCoords` : Channels coordinates struct (probe layout) with x and y position for each recording channel saved to `basename.chanCoords.channelinfo.mat` with the following fields:
-  * `x` : x position of each channel (in µm; Qx1).
-  * `y` : y position of each channel (in µm; Qx1).
-  * `source` : y position of each channel (in µm; Qx1; optional).
-  * `layout` : y position of each channel (in µm; Qx1; optional).
-  * `shankSpacing` : y position of each channel (in µm; Qx1; optional).
-  * `channel` : Channel list (Qx1; optional).
+  * `x` : x position of each channel (in µm; [nChannels x 1]).
+  * `y` : y position of each channel (in µm; [nChannels x 1]).
+  * `source` : y position of each channel (in µm; [nChannels x 1]; optional).
+  * `layout` : y position of each channel (in µm; [nChannels x 1]; optional).
+  * `shankSpacing` : y position of each channel (in µm; [nChannels x 1]; optional).
+  * `channel` : Channel list ([nChannels x 1]; optional).
+  * `verticalSpacing` : Vertical spacing between channels (in µm)
 This works as a simple 2D representation of recordings and will help you determine the location of your neurons. It is also used to determine the spike amplitude length constant of the spike waveforms across channels.
 
 __Allen Institute's Common Coordinate Framework__
 `ccf` : Allen Institute's Common Coordinate Framework (CCF) for each recording channel saved to  `basename.ccf.channelinfo.mat` with the following fields:
-  * `x` : Anterior-Posterior position of each channel (µm; Qx1).
-  * `y` : Superior-Inferior position of each channel (µm; Qx1).
-  * `z` : Left-Right position of each channel (µm; Qx1; right hemisphere positive direction).
-  * `channel` : Channel list (Qx1; optional).
+  * `x` : Anterior-Posterior position of each channel (µm; nChannelsx1).
+  * `y` : Superior-Inferior position of each channel (µm; nChannelsx1).
+  * `z` : Left-Right position of each channel (µm; nChannelsx1; right hemisphere positive direction).
+  * `channel` : Channel list (nChannelsx1; optional).
 
 The Allen Institute's Common Coordinate Frame allows you to visualize your cells into the standardized mouse atlas.
 
 ### Time series
 This is a data container for other time series data (check other containers for specific formats like intracellular). A MATLAB struct `timeserieName` stored in a .mat file: `basename.timeserieName.timeseries.mat` with the following fields:
-* `data` : a [nSamples x nChannels] vector with time series data.
+* `data` : a [nSamples x nChannels] matrix with time series data.
 * `timestamps` : a [nSamples x 1] vector with timestamps.
 * `precision` : e.g. int16.
 * `units` : e.g. mV.
@@ -301,7 +313,7 @@ Any other field can be added to the struct containing states data. The `*.states
 
 ### Behavior
 This is a data container for behavioral tracking data. A MATLAB struct `behaviorName` stored in a .mat file: `basename.behaviorName.behavior.mat` with the following fields:
-* `timestamps`:  array of timestamps that match the data subfields (in seconds).
+* `timestamps`: [nSamples x 1] array of timestamps that match the data subfields (in seconds).
 * `sr`: sampling rate (Hz).
 * SpatialSeries: several options (position, pupil, orientation) as defined below, each with optional subfields:
   * `units`: defines the units of the data.
@@ -315,7 +327,13 @@ This is a data container for behavioral tracking data. A MATLAB struct `behavior
 * `orientation`: .x, .y, .z, and .w (default units: radians)
 * `pupil`: pupil-tracking data: .x, .y, .diameter.
 * `epochs`: behaviorally derived epochs.
-* `trials`: behavioral trials defined as intervals or continuous vector with numeric trial numbers.
+* `trials`: struct with trials information.
+  * `*`: the name of the trial analysis. e.g. `alternation`
+    * `start`: trial start times in seconds.
+    * `stop`: trial end times in seconds.
+    * `trials`: continuous vector with numeric trial numbers.
+    * `nTrials`: number of trials.
+    * `stateName`: Name describing the what the trials fields describe (e.g. `Alternative running on track`).
 * `states`: e.g. spatially defined regions like central arm or waiting area in a maze. Can be binary or numeric.
 * `stateNames`: names of the states.
 * `timeSeries`: can contain any derived time traces projected into the behavioral timestamps e.g. temperature, oscillation frequency, power etc.
@@ -325,32 +343,19 @@ This is a data container for behavioral tracking data. A MATLAB struct `behavior
 
 Any other field can be added to the struct containing behavior data. The `*.behavior.mat` files should be stored in the basepath.
 
-
-### Trials
-A MATLAB struct `trials` stored in a .mat file: `basename.trials.behavior.mat`. The trials struct is a special behavior struct centered around behavioral trials. `trials` has the following fields:
-* `start`: trial start times in seconds.
-* `end`: trial end times in seconds.
-* `nTrials`: number of trials.
-* `states`: e.g. spatially defined regions like central arm or waiting area in a maze, stimulation trials, error trials. Must be binary or numeric.
-* `stateNames`: names of the states.
-* `timeSeries`: can contain any derived time traces averaged onto trial e.g. temperature. Use nan values for undefined trials.
-* `processinginfo`: a struct with information about how the .mat file was generated including the name of the function, version, date and parameters.
-
-Any other field can be added to the struct containing trial-specified data. The `trials.behavior.mat` files should be stored in the basepath. Trial-wise data should live in this container, while trial-intervals can be stored in other behavior structs.
-
 ### Firing rate maps
 This is a data container for firing rate map data. A MATLAB struct `ratemap` containing 1D or linearized firing rat maps, stored in a .mat file: `basename.ratemap.firingRateMap.mat`. The firing rate maps have the following fields:
-* `map`: a 1xN cell-struct for N units each containing a KxL matrix, where K corresponds to the bin count and L to the number of states. States can be trials, manipulation states, left-right states, etc.
-* `x_bins`: a 1xK vector with K bin values used to generate the firing rate map.
-* `x_label`: a 1xL vector with names of the states.
-* `stateNames`: a 1xL vector with names of the states.
-* `boundaries`: a 1xL vector with spatial boundaries.
-* `boundaryNames`: a 1xL vector with labels for the boundaries.
+* `map`: a [1 x N] cell-struct for N units each containing a [nBins x nStates] matrix, where nBins corresponds to the bin count and nStates to the number of states. States can be trials, manipulation states, left-right states, etc.
+* `x_bins`: a 1 x nBins vector with K bin values used to generate the firing rate map.
+* `x_label`: a 1 x nStates vector with names of the states.
+* `stateNames`: a 1 x nStates vector with names of the states.
+* `boundaries`: a 1 x nStates vector with spatial boundaries.
+* `boundaryNames`: a 1 x nStates vector with labels for the boundaries.
 
 ### Intracellular time series
 This is a data container for intracellular recordings. Any MATLAB struct `intracellularName` containing intracellular data would be stored in a .mat file: `basename.intracellularName.intracellular.mat`. It contains fields inherited from timeSeries with the following fields:
 * `data` : a [nSamples x nChannels] vector with time series data.
-* `timestamps` : a [nSamples x 1] vector with timestamps.
+* `timestamps` : a [nSamples x 1] vector with timestamps in seconds.
 * `precision` : e.g. int16.
 * `units` : e.g. mV.
 * `nChannels` : number of channels.
@@ -385,15 +390,15 @@ The data is organized into data-type specific containers, a concept introduced i
 
 * `basename.session.mat`: session level metadata.
 * `basename.*.lfp.mat`: derived ephys signals including theta-band filtered lfp.
-* `basename.*.cellinfo.mat`: Spike derived data including`spikes`, `cell_metrics`, `mono_res`
+* `basename.*.cellinfo.mat`: Spike derived data including`spikes`, `cell_metrics`, `mono_res`.
 * `basename.*.firingRateMap.mat`: firing rate maps. Derived from behavior and spikes, e.g. `ratemap`.
-* `basename.*.events.mat`: events data, including `ripples`, `SWR`,
-* `basename.*.manipulation.mat`: manipulation data: 
-* `basename.*.channelinfo.mat`: channel-wise data, including impedance
-* `basename.*.timeseries.mat`: 
-* `basename.*.behavior.mat`: behavior data, including position tracking.
+* `basename.*.events.mat`: events data, including `ripples`, `SWR`.
+* `basename.*.manipulation.mat`: manipulation data.
+* `basename.*.channelinfo.mat`: channel-wise data, including impedance.
+* `basename.*.timeseries.mat`: time series data, could be temperature measures, or other data collected together with the ephys data.
+* `basename.*.behavior.mat`: behavior data, including position tracking and pupil tracking.
 * `basename.*.states.mat`: brain states derived data including SWS/REM/awake and up/down states.
 * `basename.*.intracellular.mat`: intracellular data.
 
 ## Example dataset
-There is an example dataset available to help understanding the data structure. The dataset contains: a .dat file (raw ephys data; 62GB), a .lfp file (lowpass filtered and downsampled data file; 4 GB), session.mat, spikes, events, behavior, trials, timeseries, states, firingRateMap, cell_metrics, mono_res, and spike sorted data processed with KiloSort and curated in Phy. Available from our [Webshare](https://buzsakilab.nyumc.org/datasets/PetersenP/CellExplorerExampleData/MS22/Peter_MS22_180629_110319_concat/) and our [Globus endpoint](https://app.globus.org/file-manager?origin_id=188a6110-96db-11eb-b7a9-f57b2d55370d&origin_path=%2FPetersenP%2FCellExplorerExampleData%2FMS22%2FPeter_MS22_180629_110319_concat%2F). The size of the full dataset  is 75GB, but files can be downloaded individual. 
+There is an example dataset available to help understanding the data structure. The dataset contains: a .dat file (raw ephys data; 62GB), a .lfp file (lowpass filtered and downsampled data file; 4 GB), session.mat, spikes, events, behavior, trials, timeseries, states, firingRateMap, cell_metrics, mono_res, and spike sorted data processed with KiloSort and curated in Phy. Available from our [Webshare](https://buzsakilab.nyumc.org/datasets/PetersenP/CellExplorerExampleData/MS22/Peter_MS22_180629_110319_concat/) and our [Globus endpoint](https://app.globus.org/file-manager?origin_id=188a6110-96db-11eb-b7a9-f57b2d55370d&origin_path=%2FPetersenP%2FCellExplorerExampleData%2FMS22%2FPeter_MS22_180629_110319_concat%2F). The size of the full dataset  is 75GB, but files can be downloaded individual.
